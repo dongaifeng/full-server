@@ -12,6 +12,7 @@ module.exports = app => {
 
   router.get('/captcha', controller.utils.captcha);
   router.get('/sendcode', controller.utils.sendcode);
+  // 上传
   router.post('/uploadFile', controller.utils.uploadFile);
 
   router.group({ name: 'user', prefix: '/user' }, router => {
