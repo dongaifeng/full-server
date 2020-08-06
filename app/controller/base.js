@@ -1,8 +1,9 @@
+'use strict';
+
 const Controller = require('egg').Controller;
 
 // 定义基本Controller，定义接口返回规范
 class BaseController extends Controller {
-
   success(data) {
     this.ctx.body = {
       code: 0,
