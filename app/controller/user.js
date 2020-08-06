@@ -79,7 +79,7 @@ class UserController extends BaseController {
   async verify() {
     const { ctx } = this;
     this.success({
-      res: ctx.request.body
+      res: ctx.request.body,
     });
   }
 
