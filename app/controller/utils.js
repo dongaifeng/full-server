@@ -3,6 +3,7 @@
 const BaseController = require('./base');
 const svgCaptcha = require('svg-captcha');
 const fse = require('fs-extra');
+const path = require('path');
 
 class UtilController extends BaseController {
   async captcha() {
@@ -45,6 +46,44 @@ class UtilController extends BaseController {
     } else {
       this.error('发送失败');
     }
+  }
+
+  // 文件合并
+  async mergeFile() {
+    const { ext, hash, size } = this.ctx.request.body;
+    const filePath = path.resolve(this.config.UPLOAD_DIR, `${hash}.${ext}`);
+    await this.service.tools.mergeFile(filePath, size, hash);
+    this.success({
+      url: '/public/' + hash + '.' + ext,
+    });
+  }
+
+
+  // 上传碎片
+  async uploadChunks() {
+
+    const { ctx } = this;
+
+    // 拿到这个文件
+    const file = ctx.request.files[0];
+    const { name, hash } = ctx.request.body;
+
+    // 以hash为文件夹的名字 存储文件碎片
+    const chunkPath = path.resolve(this.config.UPLOAD_DIR, hash);
+    // 文件碎片的目录
+    // const filePath = path.resolve(this.config.UPLOAD_DIR, hash);
+
+    // 判断有没有这个路径  没有就去创建
+    if (!fse.existsSync(chunkPath)) {
+      await fse.mkdir(chunkPath);
+    }
+
+    // 把临时的文件 存到public目录
+    await fse.move(file.filepath, `${chunkPath}/${name}`);
+    this.success({
+      url: `/public/${chunkPath}/${name}`,
+    });
+
   }
 
   async uploadFile() {

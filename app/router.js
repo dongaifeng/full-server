@@ -14,6 +14,8 @@ module.exports = app => {
   router.get('/sendcode', controller.utils.sendcode);
   // 上传
   router.post('/uploadFile', controller.utils.uploadFile);
+  router.post('/uploadChunks', controller.utils.uploadChunks);
+  router.post('/mergeFile', controller.utils.mergeFile);
 
   router.group({ name: 'user', prefix: '/user' }, router => {
     const { info, login, register, verify } = controller.user;

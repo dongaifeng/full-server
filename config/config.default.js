@@ -39,7 +39,7 @@ module.exports = appInfo => {
     },
     mongoose: {
       client: {
-        url: 'mongodb://127.0.0.1:27017/fullhub',
+        url: 'mongodb://47.105.185.203:27017/fullhub',
         options: {},
       },
     },
