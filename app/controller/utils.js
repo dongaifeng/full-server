@@ -62,6 +62,10 @@ class UtilController extends BaseController {
   // 上传碎片
   async uploadChunks() {
 
+    // if (Math.random() > 0.8) {
+    //   return this.ctx.status = 500;
+    // }
+
     const { ctx } = this;
 
     // 拿到这个文件
@@ -78,12 +82,41 @@ class UtilController extends BaseController {
       await fse.mkdir(chunkPath);
     }
 
+    console.log('------------>', file, `${chunkPath}/${name}`);
+
     // 把临时的文件 存到public目录
     await fse.move(file.filepath, `${chunkPath}/${name}`);
     this.success({
       url: `/public/${chunkPath}/${name}`,
     });
 
+  }
+
+  async checkFile() {
+    const { hash, ext } = this.ctx.request.body;
+    const filePath = path.resolve(this.config.UPLOAD_DIR, `${hash}.${ext}`);
+
+    console.log('---------------->', filePath, fse.existsSync(filePath));
+    // const filePath = path.resolve(this.config.UPLOAD_DIR, )
+    let uploaded = false;
+    let uploadList = [];
+
+    // 获取 hash 名称的文件，如果有就是上传了 uploaded = true
+    // 如果没有 就是 uploaded = false， 再把 hash 文件夹下的碎片列表返回，没有碎片 就是 空数组
+    if (fse.existsSync(filePath)) {
+      uploaded = true;
+    } else {
+      uploadList = await this.getUploadList(hash);
+    }
+
+    this.success({
+      uploaded, uploadList,
+    });
+  }
+
+  async getUploadList(hash) {
+    const dir = path.resolve(this.config.UPLOAD_DIR, hash);
+    return fse.existsSync(dir) ? (await fse.readdir(dir)).filter(i => i[0] !== '.') : [];
   }
 
   async uploadFile() {

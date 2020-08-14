@@ -43,7 +43,7 @@ class Tools extends Service {
 
   }
 
-
+  // todo: 写入后 hash 文件会被删除
   async mergeChunks(chunks, filePath, size) {
     const pipStream = (filePath, writeStream) => new Promise(resolve => {
       const readStream = fse.createReadStream(filePath);

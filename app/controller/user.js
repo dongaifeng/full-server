@@ -85,14 +85,102 @@ class UserController extends BaseController {
 
   async info() {
     const { ctx } = this;
-    const { _id, email } = ctx.state;
-    console.log(ctx.state, _id);
+    const { email } = ctx.state;
+    // console.log(ctx.state, _id);
     // const res = await ctx.model.User.findOne({ _id });
     const res = await this.checkEmail(email);
-    console.log(res);
+    // console.log(res);
     this.success(res);
     // this.success({avatar: res.avatar, email: res.email, nickname: res.nickname});
 
+  }
+
+  // 获取 关注状态
+  async isfollow() {
+    const { ctx } = this;
+    const { id } = ctx.params;
+    const { _id } = ctx.state;
+
+    const me = await ctx.model.User.findById(_id);
+    const isFollow = await !!me.following.find(item => item.toString() === id);
+    this.success({ isFollow });
+  }
+
+  // 关注用户
+  async follow() {
+    const { ctx } = this;
+    const { id } = ctx.params;
+    const { _id } = ctx.state;
+
+    const me = await ctx.model.User.findById(_id);
+    const isFollow = await !!me.following.find(id => id.toString === id);
+    if (!isFollow) {
+      me.following.push(id);
+      me.save();
+      this.success('关注成功');
+    }
+  }
+  // 取消关注
+  async cancelFollow() {
+    const { ctx } = this;
+    const { _id } = ctx.state; // 本用户id
+    const { id } = ctx.params; // 文章作者id；
+
+    const me = await ctx.model.User.findById(_id);
+    const index = me.following.map(item => item.toString()).indexOf(id);
+    if (index > -1) {
+      me.following.splice(index, 1);
+      me.save();
+      this.message('取消成功');
+    }
+  }
+
+  // 获取喜欢 文章 状态
+  async articleStatus() {
+    const { ctx } = this;
+    const { _id } = ctx.state;
+    const { id } = ctx.params; // 文章id
+
+    const me = await ctx.model.User.findById(_id);
+    const like = !!me.likeArticle.find(i => i.toString() === id);
+    const disLikeArticle = !!me.disLikeArticle.find(i => i.toString() === id);
+
+    this.success({
+      like, disLikeArticle,
+    });
+  }
+
+  // 点赞文章
+  async likeArticle() {
+    const { ctx } = this;
+    const { _id } = ctx.state;
+    const { id } = ctx.params; // 文章id
+
+    const me = await ctx.model.User.findById(_id);
+
+    if (!me.likeArticle.find(i => i.toString() === id)) {
+      me.likeArticle.push(id);
+      console.log('<----------------->', me);
+      me.save();
+      await ctx.model.Article.findByIdAndUpdate(id, { $inc: { like: 1 } });
+      return this.message('点赞成功');
+    }
+  }
+
+  // 取消点赞
+  async cancelLikeArticle() {
+    const { ctx } = this;
+    const { _id } = ctx.state;
+    const { id } = ctx.params; // 文章id
+
+    const me = await ctx.model.User.findById(_id);
+    const ind = me.likeArticle.map(i => i.toString()).indexOf(id);
+    if (ind > -1) {
+      me.likeArticle.splice(ind, 1);
+      me.save();
+      await ctx.model.Article.findByIdAndDelete(id, { $inc: { like: -1 } });
+      return this.message('取消点赞成功');
+    }
   }
 }
 module.exports = UserController;

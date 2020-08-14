@@ -11,6 +11,21 @@ module.exports = app => {
     __v: { type: Number, select: false },
     nickname: { type: String, required: true },
     avatar: { type: String, required: false, default: '/user.png' },
+    // 关注着
+    following: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+      default: [],
+    },
+    // 喜欢的文章
+    likeArticle: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
+      default: [],
+    },
+
+    disLikeArticle: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
+      default: [],
+    },
   }, {
     timestamps: true,
   });
